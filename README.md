@@ -1,7 +1,9 @@
-# SilverStripe Lazy Forms for Static Publisher
+# SilverStripe Lazy Forms
 Convert normal SilverStripe form into Lazy loading forms and take maximum advantage of the SilverStripe Static Publishing module.
-The module show the exact same form in disabled state on load. This can be used as a skeleton.
-With CSS you van change it to greyed out.
+The module show the exact same form in disabled state while loading. This form can be used as a skeleton.
+With CSS you can change it to greyed out, see example below.
+
+The form is fully functional after loading.
 
 ### Installation
 ```
@@ -30,17 +32,17 @@ The form is loaded without SecurityID in a disabled state in the static publishe
 You can grey out all the fields with you own css. This is visible while the real form is loading.
 
 ```scss
-/* SCSS Foundation example */
+/* SCSS Example */
 .lazyform--loading {
-  ul.optionset label,
+   ul.optionset label,
   .text label,
   .textarea label,
   .text input,
   .textarea textarea,
   select.dropdown,
   .button{
-    background-color: $medium-gray !important;
-    color: $medium-gray !important;
+    background-color: #999 !important;
+    color: #999 !important;
     opacity: .5 !important;
   }
 }
