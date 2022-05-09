@@ -42,6 +42,7 @@ class LazyFormsControllerExtension extends Extension
                 xmlhttp.onreadystatechange = function(){
                     if (xmlhttp.readyState==4 && xmlhttp.status==200){
                         target.innerHTML=xmlhttp.responseText;
+                        document.dispatchEvent(new CustomEvent("onLazyformLoaded",{target:target}));
                     }
                 };
                 xmlhttp.open("GET",url,true);
