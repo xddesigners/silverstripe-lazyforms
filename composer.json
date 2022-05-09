@@ -1,0 +1,21 @@
+{
+  "name": "xddesigners/silverstripe-lazyforms",
+  "description": "Convert your dynamic forms into lazy loading forms. To be used with static published pages.",
+  "type": "silverstripe-vendormodule",
+  "keywords": [
+    "silverstripe",
+    "static publishing",
+    "lazy loading forms",
+    "forms",
+    "speed",
+    "optimisation"
+  ],
+  "license": "BSD-3-Clause",
+  "autoload": {
+    "psr-4": {
+      "XD\\QRCodeGenerator\\": "src/"
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}

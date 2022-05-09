@@ -1,0 +1,9 @@
+---
+Name: lazyformextensions
+---
+PageController:
+  extensions:
+    - XD\LazyForms\Extensions\LazyFormsControllerExtension
+DNADesign\Elemental\Models\BaseElement:
+  extensions:
+    - XD\LazyForms\Extensions\LazyFormsBaseElementExtension
