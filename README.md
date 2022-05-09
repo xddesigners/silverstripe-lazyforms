@@ -7,7 +7,7 @@ The form is fully functional after loading.
 
 ### Installation
 ```
-composer require xddesigners/silverstripe-qr-code-generator
+composer require xddesigners/silverstripe-lazyforms
 
 // optional if not already present
 composer require "silverstripe/staticpublishqueue
