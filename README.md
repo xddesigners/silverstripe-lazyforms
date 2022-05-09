@@ -8,6 +8,8 @@ The form is fully functional after loading.
 ### Installation
 ```
 composer require xddesigners/silverstripe-qr-code-generator
+
+// optional if not already present
 composer require "silverstripe/staticpublishqueue
 ```
 
