@@ -1,5 +1,6 @@
 # SilverStripe Lazy Forms
 Convert normal SilverStripe form into Lazy loading forms and take maximum advantage of the SilverStripe Static Publishing module.
+In the static publishing module pages with forms are not allowed.
 The module show the exact same form in disabled state while loading. This form can be used as a skeleton.
 With CSS you can change it to greyed out, see example below.
 
