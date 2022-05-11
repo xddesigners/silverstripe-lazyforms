@@ -18,12 +18,22 @@ class LazyFormsBaseElementExtension extends DataExtension
         'LazyForm' => 'HTMLText'
     ];
 
-    public function LazyForm($name='Form')
+    public function LazyForm($name = 'Form')
     {
         /** @var Controller|LazyFormsControllerExtension $controller */
         $controller = Controller::curr();
-        if( $controller->hasMethod('LazyForm') ) {
+        if ($controller->hasMethod('LazyForm')) {
             return $controller->LazyForm($name);
+        }
+        return false;
+    }
+
+    public function LazyInclude($name)
+    {
+        /** @var Controller|LazyFormsControllerExtension $controller */
+        $controller = Controller::curr();
+        if ($controller->hasMethod('LazyInclude')) {
+            return $controller->LazyInclude($name, $this->owner);
         }
         return false;
     }
