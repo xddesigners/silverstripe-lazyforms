@@ -18,45 +18,64 @@ class LazyFormsControllerExtension extends Extension
 {
 
     private static $allowed_actions = [
-        'loadlazyform'
-    ];
-
-    /**
-     * @var string[]
-     * Only these methods are allowed can be configured via YML
-     */
-    private static $allowed_forms = [
-        'Form',
-        'ProductReviewForm'
+        'loadlazyitem',
     ];
 
     private static $casting = [
-        'LazyForm' => 'HTMLText'
+        'LazyForm' => 'HTMLText',
+        'LazyInclude' => 'HTMLText',
     ];
 
     public function includeScript()
     {
-        $script = 'let lazyform=function(name,target){
-                let url=window.location.href.split("?")[0]+"/loadlazyform/"+name;
-                let xmlhttp=new XMLHttpRequest();
-                xmlhttp.onreadystatechange = function(){
-                    if (xmlhttp.readyState==4 && xmlhttp.status==200){
-                        target.innerHTML=xmlhttp.responseText;
-                        document.dispatchEvent(new CustomEvent("onLazyformLoaded",{target:target}));
-                    }
-                };
-                xmlhttp.open("GET",url,true);
-                xmlhttp.send();
+        $script = '
+        let lazyload=function(name,target,type){
+            let url=window.location.href.split("?")[0]+"/loadlazyitem/"+type+"/"+name;
+            let xmlhttp=new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function(){
+                if (xmlhttp.readyState==4 && xmlhttp.status==200){
+                    target.innerHTML=xmlhttp.responseText;
+                    target.classList.add("lazyloaded");
+                    document.dispatchEvent(new CustomEvent("onLazyformLoaded",{target:target,type:type}));
+                }
             };
-            let ts=document.getElementsByClassName("lazyform");
-            for(let i=0;i<ts.length;i++) {
-               lazyform(ts[i].dataset.lazyform,ts[i]);
-            }';
+            xmlhttp.open("GET",url,true);
+            xmlhttp.send();
+        };
+        let lazyinclude=function(name,target){
+            lazyload(name,target,"include");        
+        };
+        let lazyform=function(name,target){
+            lazyload(name,target,"form");
+        };
+        let lis=document.getElementsByClassName("lazyinclude");
+        console.log("list",lis);
+        for(let i=0;i<lis.length;i++) {
+           lazyload(lis[i].dataset.lazyinclude,lis[i],"include");
+        }
+        let lfs=document.getElementsByClassName("lazyform");
+        for(let i=0;i<lfs.length;i++) {
+           lazyload(lfs[i].dataset.lazyform,lfs[i],"form");
+        }';
+
         $script = preg_replace(["/\s+\n/", "/\n\s+/", "/ +/"], ["", " ", " "], $script);
         Requirements::customScript(<<<JS
             $script
         JS
-        ,'lazyforms');
+            , 'lazyforms');
+    }
+
+    public function LoadLazyItem($request)
+    {
+        $type = $request->param('ID');
+        $name = $request->param('OtherID');
+        switch( $type ){
+            case 'include':
+                return $this->owner->LoadLazyInclude($name);
+            case 'form':
+            default:
+                return $this->owner->LoadLazyForm($name);
+        }
     }
 
     public function LazyForm($name = 'Form')
@@ -97,11 +116,35 @@ class LazyFormsControllerExtension extends Extension
         return null;
     }
 
-    public function LoadLazyForm($request)
+    public function LoadLazyForm($formName)
     {
-        $formName = $request->param('ID');
         if ($form = $this->owner->LazyFormByName($formName)) {
             return $form->forTemplate();
+        }
+        return $this->owner->httpError(404);
+    }
+
+    public function LazyInclude($name, $scope = null)
+    {
+        $this->includeScript();
+        $include = $this->owner->LazyIncludeByName($name, $scope);
+        $name = str_replace('\\','-',$name);
+        return '<div class="lazyinclude" data-lazyinclude="' . $name . '">' . $include->forTemplate() . '</div>';
+    }
+
+    public function LazyIncludeByName($name, $scope = null)
+    {
+        if (!$scope) $scope = $this->owner;
+        $name = str_replace('-','\\',$name);
+        return $scope->renderWith($name);
+    }
+
+    public function LoadLazyInclude($includeName)
+    {
+        // how to handle scope here? for now use this->owner as scope
+        $scope = $this->owner;
+        if ($include = $this->owner->LazyIncludeByName($includeName, $scope)) {
+            return $include->forTemplate();
         }
         return $this->owner->httpError(404);
     }
