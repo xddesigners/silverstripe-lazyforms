@@ -28,15 +28,18 @@ class LazyFormsControllerExtension extends Extension
 
     public function includeScript()
     {
+        //language=JS
         $script = '
-        let lazyload=function(name,target,type){
+        let lazyload=function(name,id,type){
             let url=window.location.href.split("?")[0]+"/loadlazyitem/"+type+"/"+name;
+            url = url.replace(/([^:]\/)\/+/g, "$1");
             let xmlhttp=new XMLHttpRequest();
             xmlhttp.onreadystatechange = function(){
                 if (xmlhttp.readyState==4 && xmlhttp.status==200){
+                    let target=document.querySelector("[data-lazyid="+id+"]");
                     target.innerHTML=xmlhttp.responseText;
                     target.classList.add("lazyloaded");
-                    document.dispatchEvent(new CustomEvent("onLazyformLoaded",{target:target,type:type}));
+                    document.dispatchEvent(new CustomEvent("onLazyformLoaded",{detail:{lazytype:type,lazyid:id,target:target,name:name}}));
                 }
             };
             xmlhttp.open("GET",url,true);
@@ -49,13 +52,14 @@ class LazyFormsControllerExtension extends Extension
             lazyload(name,target,"form");
         };
         let lis=document.getElementsByClassName("lazyinclude");
-        console.log("list",lis);
         for(let i=0;i<lis.length;i++) {
-           lazyload(lis[i].dataset.lazyinclude,lis[i],"include");
+           let id=lis[i].dataset.lazyid="include-"+i;
+           lazyload(lis[i].dataset.lazyinclude,id,"include");
         }
         let lfs=document.getElementsByClassName("lazyform");
         for(let i=0;i<lfs.length;i++) {
-           lazyload(lfs[i].dataset.lazyform,lfs[i],"form");
+           let id=lfs[i].dataset.lazyid="form-"+i;
+           lazyload(lfs[i].dataset.lazyform,id,"form");
         }';
 
         $script = preg_replace(["/\s+\n/", "/\n\s+/", "/ +/"], ["", " ", " "], $script);
