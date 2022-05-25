@@ -31,7 +31,8 @@ class LazyFormsControllerExtension extends Extension
         //language=JS
         $script = '
         let lazyload=function(name,id,type){
-            let url=window.location.href.split("?")[0]+"/loadlazyitem/"+type+"/"+name;
+            let home=window.location.pathname==="/"?"home":"";
+            let url=window.location.href.split("?")[0]+home+"/loadlazyitem/"+type+"/"+name;
             url = url.replace(/([^:]\/)\/+/g, "$1");
             let xmlhttp=new XMLHttpRequest();
             xmlhttp.onreadystatechange = function(){
@@ -73,7 +74,7 @@ class LazyFormsControllerExtension extends Extension
     {
         $type = $request->param('ID');
         $name = $request->param('OtherID');
-        switch( $type ){
+        switch ($type) {
             case 'include':
                 return $this->owner->LoadLazyInclude($name);
             case 'form':
@@ -82,9 +83,11 @@ class LazyFormsControllerExtension extends Extension
         }
     }
 
-    public function LazyForm($name = 'Form')
+    public function LazyForm($name = 'Form', $preload = true)
     {
         $this->includeScript();
+        if ($preload === 'true') $preload = true;
+        if ($preload === 'false') $preload = false;
 
         // create greyed out form skeleton
         $form = $this->LazyFormByName($name);
@@ -100,7 +103,14 @@ class LazyFormsControllerExtension extends Extension
             /** @var FormAction $action */
             $action->setDisabled(true);
         }
-        return '<div class="lazyform" data-lazyform="' . $name . '">' . $form->forTemplate() . '</div>';
+        if ($preload === true) {
+            $content = $form->forTemplate();
+        } elseif (is_string($preload) && $preload != 'false') {
+            $content = $this->owner->LazyIncludeByName($preload);
+        } else {
+            $content = '...';
+        }
+        return '<div class="lazyform" data-lazyform="' . $name . '">' . $content . '</div>';
     }
 
     /**
@@ -128,18 +138,30 @@ class LazyFormsControllerExtension extends Extension
         return $this->owner->httpError(404);
     }
 
-    public function LazyInclude($name, $scope = null)
+    public function LazyInclude($name, $preload = true, $scope = null)
     {
         $this->includeScript();
-        $include = $this->owner->LazyIncludeByName($name, $scope);
-        $name = str_replace('\\','-',$name);
-        return '<div class="lazyinclude" data-lazyinclude="' . $name . '">' . $include->forTemplate() . '</div>';
+        if ($preload === 'true') $preload = true;
+        if ($preload === 'false') $preload = false;
+        if ($preload === true) {
+            // preload include, default
+            $include = $this->owner->LazyIncludeByName($name, $scope);
+            $content = $include->forTemplate();
+        } elseif (is_string($preload) && $preload != 'false') {
+            // preload faster loading simple template
+            $content = $this->owner->LazyIncludeByName($preload);
+        } else {
+            // empty
+            $content = '...';
+        }
+        $name = str_replace('\\', '-', $name);
+        return '<div class="lazyinclude" data-lazyinclude="' . $name . '">' . $content . '</div>';
     }
 
     public function LazyIncludeByName($name, $scope = null)
     {
         if (!$scope) $scope = $this->owner;
-        $name = str_replace('-','\\',$name);
+        $name = str_replace('-', '\\', $name);
         return $scope->renderWith($name);
     }
 
