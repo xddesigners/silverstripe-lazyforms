@@ -32,7 +32,9 @@ class LazyFormsControllerExtension extends Extension
         $script = '
         let lazyload=function(name,id,type){
             let home=window.location.pathname==="/"?"home":"";
-            let url=window.location.href.split("?")[0]+home+"/loadlazyitem/"+type+"/"+name;
+            let location = window.location.href.split("?")[0]+home;
+            location = location.split("#")[0];
+            let url=location+"/loadlazyitem/"+type+"/"+name;
             url = url.replace(/([^:]\/)\/+/g, "$1");
             let xmlhttp=new XMLHttpRequest();
             xmlhttp.onreadystatechange = function(){
